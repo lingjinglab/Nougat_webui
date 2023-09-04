@@ -1,0 +1,16 @@
+employs two-stage modeling, which first generates the codec codes of the first quantizer of EnCodec (Defossez et al., 2022) from the paired phoneme sequences using an autoregressive language model, and then generates the codes of the rest quantizers in parallel using a non-autoregressive model. After training on the large-scale English speech-transcription dataset LibriLight, VALL-E shows strong in-context learning capabilities. It can generate personalized speech by taking only a 3-second speech fragment as a prompt. Based on VALL-E, our VALL-E X extend to train a cross-lingual neural codec language model, enabling zero-shot cross-lingual capability and supporting cross-lingual TTS or speech-to-speech translation tasks.
+
+### Model Framework
+
+Inspired by VALL-E, the cross-lingual codec language model VALL-E X (denoted as \(\phi\)) leverages a multi-lingual autoregressive codec LM and a multi-lingual non-autoregressive codec LM to generate acoustic tokens at different granularities, as shown in the left part of Figure 2. We also adopt the neural codec model EnCodec (Defossez et al., 2022) as the acoustic quantizer, which is an encoder-decoder model with \(L\) quantization layers. We choose \(L=8\) in our experiments, for each layer it produces quantized codes of 1024 entries at 75Hz.
+
+Multi-lingual Autoregressive Codec LMThe multi-lingual autoregressive codec LM \(\phi_{\mathrm{MAR}}\) is a unidirectional Transformer decoder that autoregressively generates acoustic tokens based on the semantic tokens (phoneme sequence). To make the sentence-level training efficient and accelerate the decoding during inference, similar to VALL-E, the cross-lingual autoregressive codec LM \(\phi_{\mathrm{MAR}}\) is only used to predict the acoustic tokens from the first quantizer of EnCodec model.
+
+Formally, based on paired speech-transcription data in any language, let \(\mathcal{S}\) denote the transcribed phoneme sequence, and \(\mathcal{A}_{:,1}\triangleq\{a_{i,1}|i=1,\ldots,N\}\) denotes the first-layer acoustic tokens extracted from the speech \(\mathcal{X}\). The decoder \(\phi_{\mathrm{MAR}}\), modeling the concatenated sequence \(\langle\mathcal{S},\mathcal{A}_{:,1}\rangle\), is trained to predict \(\mathcal{A}_{:,1}\) autoregressively. It is optimized by maximizing the log-likelihood,
+
+\[\mathcal{L}_{\mathrm{MAR}}=-\mathrm{log}\;p_{\mathrm{AR}}\left(\mathcal{A}_{:, 1}\;|\;\mathcal{S};\phi_{\mathrm{MAR}}\right)=-\mathrm{log}\;\prod_{i=1}^{N}p \left(a_{i,1}\;|\;\langle\mathcal{S},\mathcal{A}_{<i,1}\rangle\,;\phi_{ \mathrm{MAR}}\right) \tag{1}\]
+
+where \(\langle\rangle\) means sequence concatenation operation, and \(p(.)\) is the softmax function.
+
+Figure 2: Training illustration of the cross-lingual neural codec language model VALL-E X, consisting of a multi-lingual autoregressive codec LM (\(\phi_{\mathrm{MAR}}\)) and a multi-lingual non-autoregressive codec LM (\(\phi_{\mathrm{MAR}}\)). Multi-lingual acoustic tokens (\(\mathcal{A}\)) and phoneme sequences (\(\mathcal{S}\)) are converted from speech and transcription using an audio codec encoder and G2P tool, respectively. During training, we use paired \(\mathcal{S}\) and \(\mathcal{A}\) from different languages to optimize these two models.
+
