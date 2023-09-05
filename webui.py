@@ -1,4 +1,7 @@
+import time
+
 import gradio as gr
+from datetime import datetime
 import os
 import sys
 from functools import partial
@@ -42,6 +45,15 @@ def load_model(
 def upload_file(file):
     # 在这里处理上传的文件
     pass
+
+def read_HTML_template():
+    # 打开文件
+    file = open('./covert.html', 'r')
+    # 读取文件内容
+    content = file.read()
+    # 关闭文件
+    file.close()
+    return content
 
 
 def run_orc(file, start, stop):
@@ -123,13 +135,33 @@ def run_orc(file, start, stop):
     return final
 
 
+static_dir = Path('./static')
+static_dir.mkdir(parents=True, exist_ok=True)
+
+#创建iframe用于转换数据格式
+def build_iframe(content):
+    html = read_HTML_template()
+    content = content.replace("\\","\\\\")
+    content = content.replace("\n", "\\n")
+    html = html.replace("{{__doc__}}", content)
+    file_name = "temp.html"
+    file_path = static_dir / file_name
+    print(file_path)
+    with open(file_path, "w") as f:
+        f.write(html)
+    iframe = f"""<iframe src="file={file_path}?t={time.time()}" width="100%" height="500px"></iframe>"""
+    # link = f'<a href="file={file_path}" target="_blank">{file_name}</a>'
+    return iframe
 def submit_handler(file, dropdown1):
     # 在这里处理提交事件
     print("Submit 按钮被点击")
     print("上传的文件:", file.name)
     print("下拉框1选择的值:", dropdown1)
     # return markdown.markdown(run_orc(file, int(dropdown1), int(dropdown2)))
-    return run_orc(file, int(dropdown1), int(dropdown1))
+    content = run_orc(file, int(dropdown1), int(dropdown1))
+    # html = read_HTML_template()
+    # html = html.replace("{{__doc__}}",content)
+    return build_iframe(content)
 
 
 # 创建上传组件
@@ -139,8 +171,8 @@ upload_component = gr.inputs.File(label="pdf文件", type="file")
 dropdown_component1 = gr.inputs.Number(label="要转换的页码")
 
 # 创建 Markdown 预览组件
-markdown_component = gr.Markdown(label="Markdown 预览")
-
+# markdown_component = gr.Markdown(label="Markdown 预览")
+markdown_component = gr.outputs.HTML()
 # 创建 Gradio UI
 iface = gr.Interface(
     fn=submit_handler,
@@ -149,8 +181,8 @@ iface = gr.Interface(
         dropdown_component1,
     ],
     outputs=markdown_component,
-    title="Markdown 预览",
-    description="上传文件并选择选项，然后查看 Markdown 预览",
+    title="Nougat WebUI",
+    description="上传文件PDF识别文件内容",
     capture_session=True,  # 启用会话捕获
 )
 print(torch.cuda.is_available())

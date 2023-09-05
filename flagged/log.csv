@@ -8,3 +8,68 @@ E:\workspace\python\Ocr\Nougat_webui\flagged\pdf文件\2303.03926kxophz9y.pdf,11
 \end{table}<br>
 Table 4: S2ST performance on EMIME dataset for Chinese(\leftrightarrow)English directions. Baseline is a cascaded S2ST system based on speaker embedding. Automatic evaluation matrices include ASV-Score, ASR-BLEU, and Naturalness.</p>
 ",,,2023-09-05 11:00:29.783718
+E:\workspace\python\Ocr\Nougat_webui\flagged\pdf文件\2303.039264hzqni5n.pdf,6,"'<!DOCTYPE html>
+<html lang=""en"" data-lt-installed=""true""><head>
+  <meta charset=""UTF-8"">
+  <title>Title</title>
+  <script>
+    const text = Multi-lingual Non-Autoregressive Code LMInstead of the autoregressive generation pattern, multi-lingual non-autoregressive codec LM \(\phi_{\mathrm{MNAR}}\) is a non-autoregressive Transformer language model aiming at iteratively generating the rest layers of acoustic tokens from the first layer. It is prompted by the phoneme sequence of the current sentence (\(\mathcal{S}\)) and the acoustic token sequence of another sentence with the same speaker (\(\tilde{\mathcal{A}}\)). Here \(\tilde{\mathcal{A}}\) is taken from the previous sentence in the dataset where the adjusted sentences are usually segmented from the same paragraph. It is expected to have the same characteristics of voice (speaker, speed, background, etc) as the current sentence and is used as an additional reference for cloning the target voice. Like VALL-E, for generating acoustic tokens of each layer \(l\in[2,8]\), the embeddings of \(l-1\) layers' acoustic tokens (\(\mathcal{A}_{\cdot,1:l-1}\)) are summed up layerwise as input. The learning objective for the \(l\)-layer acoustic tokens \(\mathcal{A}_{\cdot,l}\) can be calculated as
+
+\[\mathcal{L}_{\mathrm{MNAR}}=\sum_{l=2}^{8}\log p_{\mathrm{NAR}}\left(\mathcal{ A}_{\cdot,l}\mid\left\langle\mathcal{S},\tilde{\mathcal{A}}_{\cdot,1:8}, \mathcal{A}_{\cdot,1:l-1}\right\rangle;\phi_{\mathrm{MNAR}}\right) \tag{2}\]
+
+where \(\left\langle\right\rangle\) means the sequence concatenation. \(p_{\mathrm{NAR}}(.)\) computes the pointwise probabilities of \(\mathcal{A}_{\cdot,l}\).
+
+### Multi-lingual Training
+
+In order to learn cross-lingual acoustic conversion information for cross-lingual TTS and speech-to-speech translation tasks, we take advantage of bilingual speech-transcription (ASR) corpus2, pairs of (\(\mathcal{S}^{s}\), \(\mathcal{A}^{s}\)) and (\(\mathcal{S}^{t}\), \(\mathcal{A}^{t}\)) to train our multi-lingual codec LMs \(\phi_{\mathrm{MAR}}\) and \(\phi_{\mathrm{MNAR}}\), where \(s\) and \(t\) represent two different (source and target) languages.
+
+Footnote 2: Current version of VALL-E X is trained on the speech-transcription of two languages, we leave exploring more languages for future work.
+
+Language ID ModuleFollowing multi-lingual TTS, we leverage a language ID to guide the speech generation for specific languages in VALL-E X. On the one hand, without language ID, VALL-E X may be confused to select suitable acoustic tokens for the specific language since it is trained with multi-lingual data. On the other hand, some languages have very different characteristics, for example, Chinese is a tone language while English is a non-tone language, which increases the difficulty of adjusting the speaking style across languages. Our experiments found that adding language information to the input of our multi-lingual autoregressive codec LM \(\phi_{\mathrm{MAR}}\) is surprisingly effective in guiding the right speaking style and relieving the L2 accent problem, which will be introduced in Section 5.5. Concretely, we embed language IDs into dense vectors and add them to the embeddings of acoustic tokens.
+
+### Cross-Lingual Inference
+
+After training, VALL-E X can perform cross-lingual speech synthesis, as shown in Figure 3. In detail, we first concatenate source phonemes \(\mathcal{S}^{s}\) and target phonemes \(\mathcal{S}^{t}\) as prompts, and take the first-layer source acoustic tokens \(\mathcal{A}^{s}_{\cdot,1}\) as the decoding prefix, condition on which the multi-lingual autoregressive codec LM \(\phi_{\mathrm{MAR}}\) generates the first-layer target acoustic tokens \(\mathcal{A}^{t}_{\cdot,1}\),
+
+\[\hat{a}^{t}_{\cdot,1}\sim p_{\mathrm{AR}}\left(a^{t}_{\cdot,1}\mid\left\langle \mathcal{S}^{s},\mathcal{S}^{t},\mathcal{A}^{s}_{\cdot,1},\mathcal{A}^{t}_{ \cdot<i,1}\right\rangle;\phi_{\mathrm{MAR}}\right),i=1,\ldots, \tag{3}\]
+
+where \(\sim\) means probability-based sampling. The sampling is stopped until the <end-of-sentence> token is sampled. As mentioned in Section 3.3, language ID is used to control the speaking style of the final generated speech. After obtaining the first-layer target acoustic tokens \(\mathcal{A}^{t}_{\cdot,1}\) from \(\phi_{\mathrm{MAR}}\), multi-lingual non-autoregressive codec LM \(\phi_{\mathrm{MNAR}}\) is used to predict the rest layers of acoustic tokens \(\left\{\mathcal{A}^{t}_{\cdot,l}\mid l=2,\ldots,8\right\}\) by greedy search, i.e., choosing the tokens with maximum probabilities,
+
+\[\mathcal{A}^{t}_{\cdot,l}=\operatorname*{argmax}_{\mathcal{A}^{t}_{\cdot,l}}p _{\mathrm{NAR}}\left(\mathcal{A}^{t}_{\cdot,l}\mid\left\langle\mathcal{S}^{t },\mathcal{A}^{s}_{\cdot,1:8},\mathcal{A}^{t}_{\cdot,1:l-1}\right\rangle; \phi_{\mathrm{MNAR}}\right),l=2,\ldots,8. \tag{4}\]
+
+Finally, we use the decoder of EnCodec to synthesize the target speech from the complete target acoustic tokens \(\mathcal{A}^{t}_{\cdot,1:8}\).;
+  </script>
+  <style>
+    #content {
+      max-width: 800px;
+      margin: auto;
+    }
+  </style>
+  <script>
+    let script = document.createElement('script');
+    script.src = ""https://cdn.jsdelivr.net/npm/mathpix-markdown-it@1.0.40/es5/bundle.js"";
+    document.head.append(script);
+
+    script.onload = function() {
+      const isLoaded = window.loadMathJax();
+      if (isLoaded) {
+        console.log('Styles loaded!')
+      }
+
+      const el = window.document.getElementById('content-text');
+      if (el) {
+        const options = {
+          htmlTags: true
+        };
+        const html = window.render(text, options);
+        el.outerHTML = html;
+      }
+    };
+  </script>
+</head>
+<body>
+  <div id=""content""><div id=""content-text""></div></div>
+</body>
+</html>
+",,,2023-09-05 17:05:20.792296
+E:\workspace\python\Ocr\Nougat_webui\flagged\pdf文件\2303.03926g4j5net6.pdf,11,"<iframe src=""file=static\1693909432.492151temp.html"" width=""100%"" height=""500px""></iframe>",,,2023-09-05 18:24:05.727528
