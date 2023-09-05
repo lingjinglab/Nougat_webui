@@ -112,7 +112,7 @@ def run_orc(file, start, stop):
     pdf.save(save_path / "doc.pdf")
     if len(images) > 0:
         thumb = Image.open(images[0])
-        thumb.thumbnail((400, 400))
+        # thumb.thumbnail((400, 400))
         thumb.save(save_path / "thumb.jpg")
     for idx, page_num in enumerate(pages):
         (save_path / "pages" / ("%02d.mmd" % (page_num + 1))).write_text(
