@@ -13,7 +13,7 @@ git clone https://github.com/nougat-project/nougat_webui.git
 pip install nougat-ocr
 
 //通过源码安装
-pip install git+https://github.com/facebookresearch/nougat    
+pip install git+https://github.com/facebookresearch/nougat 
 ``` 
 
 ### 2. 启动   
